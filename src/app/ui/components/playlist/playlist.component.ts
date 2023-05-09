@@ -1,4 +1,9 @@
 import { AfterViewInit, Component, OnDestroy, ViewChild, ElementRef, Renderer2 } from '@angular/core';
+import { NgxSpinner, NgxSpinnerService } from 'ngx-spinner';
+import { BaseComponent, SpinnerType } from 'src/app/base/base.component';
+import { Song } from 'src/app/contracts/song';
+import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/services/common/custom-toastr.service';
+import { SongService } from 'src/app/services/common/song.service';
 
 
 
@@ -7,14 +12,16 @@ import { AfterViewInit, Component, OnDestroy, ViewChild, ElementRef, Renderer2 }
   templateUrl: './playlist.component.html',
   styleUrls: ['./playlist.component.scss']
 })
-export class PlaylistComponent implements AfterViewInit, OnDestroy {
+export class PlaylistComponent extends BaseComponent implements AfterViewInit, OnDestroy {
   @ViewChild('player', { static: false }) playerElement: ElementRef;
   @ViewChild('playButton', { static: false }) playButton: ElementRef; // Düğmeye erişmek için
   private player: any;
   private ytEvent: any;
   private videoId = 'wuGt8wanfhE'; // İstediğiniz video ID'si ile değiştirin.
 
-  constructor(private renderer: Renderer2) {} // Renderer2'yi enjekte et
+  constructor(private renderer: Renderer2, spinner: NgxSpinnerService, private songService: SongService, private toastrService: CustomToastrService) {
+    super(spinner)
+  } // Renderer2'yi enjekte et
 
   ngAfterViewInit() {
     
@@ -76,6 +83,22 @@ export class PlaylistComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.player.destroy();
+  }
+
+  create(name: HTMLInputElement, videoId: HTMLInputElement, genre: HTMLInputElement) {
+    this.showSpinner(SpinnerType.BallElasticDot)
+    const song: Song = new Song();
+    song.name = name.value;
+    song.videoId = videoId.value;
+    song.genre = genre.value;
+
+    this.songService.create(song, () => {
+      this.hideSpinner(SpinnerType.BallElasticDot);
+      this.toastrService.message("Ürün başarıyla eklenmiştir.", "ürün", {
+        messageType: ToastrMessageType.Success,
+        position: ToastrPosition.TopRight
+      });
+    });
   }
 
   
