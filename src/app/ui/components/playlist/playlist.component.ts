@@ -17,14 +17,14 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   @ViewChild('playButton', { static: false }) playButton: ElementRef; // Düğmeye erişmek için
   private player: any;
   private ytEvent: any;
-  private videoId = 'wuGt8wanfhE'; // İstediğiniz video ID'si ile değiştirin.
+  private videoId = 'rndl981UBwM'; // İstediğiniz video ID'si ile değiştirin.
 
   constructor(private renderer: Renderer2, spinner: NgxSpinnerService, private songService: SongService, private toastrService: CustomToastrService) {
     super(spinner)
   } // Renderer2'yi enjekte et
 
   ngAfterViewInit() {
-    
+
     this.init();
   }
 
@@ -40,25 +40,25 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       this.init();
     };
   }
-  
+
   init() {
     if (window['YT']) {
-      this.startVideo();
-      
+      //this.startVideo();
+
     } else {
       window['onYouTubeIframeAPIReady'] = () => {
-        
-        this.startVideo();
+
+        //this.startVideo();
       };
     }
   }
-  
+
   startVideo() {
     this.player = new window['YT'].Player(this.playerElement.nativeElement, {
       videoId: this.videoId,
       events: {
         'onStateChange': this.onPlayerStateChange.bind(this),
-       
+
       },
       playerVars: {
         'autoplay': 1,
@@ -67,14 +67,14 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
         'modestbranding': 1, // YouTube logosunu gizleyin.
         'rel': 0,
         'showinfo': 0 // Video başlığı ve yükleyici bilgilerini gizleyin.
-        
+
       }
     });
   }
-  
+
   onPlayerStateChange(event) {
     this.ytEvent = event.data;
-  
+
     // Kullanıcı videoyu duraklatmaya çalıştığında, oynatmayı sürdür.
     if (this.ytEvent === window['YT'].PlayerState.PAUSED) {
       this.player.playVideo();
@@ -84,11 +84,9 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   ngOnDestroy() {
     this.player.destroy();
   }
-
-  create(name: HTMLInputElement, videoId: HTMLInputElement, genre: HTMLInputElement) {
+  create( videoId: HTMLInputElement, genre: HTMLInputElement) {
     this.showSpinner(SpinnerType.BallElasticDot)
     const song: Song = new Song();
-    song.name = name.value;
     song.videoId = videoId.value;
     song.genre = genre.value;
 
@@ -101,5 +99,5 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     });
   }
 
-  
+
 }

@@ -16,4 +16,16 @@ export class SongService {
         successCallBack();
       });
   }
+
+  getVideoIds(successCallBack?: any) {
+    this.httpClientService.get<string[]>({
+      controller: "songs"
+    })
+    .subscribe(result => {
+      if (successCallBack) {
+        successCallBack(result);
+      }
+    });
+  }
+  
 }

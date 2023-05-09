@@ -3,10 +3,7 @@
 <button #playButton (click)="startVideo()">Videoyu oynat</button>
 
 
-<mat-form-field appearance="fill">
-    <mat-label>Name</mat-label>
-    <input matInput #txtName>
-  </mat-form-field>
+
   <mat-form-field appearance="fill">
     <mat-label>VideoId</mat-label>
     <input matInput #txtVideoId>
@@ -16,4 +13,4 @@
     <input matInput #txtGenre>
   </mat-form-field>
   
-  <button mat-raised-button class="btn" color="primary" (click)="create(txtName, txtVideoId, txtGenre)">Create Song</button>
+  <button mat-raised-button class="btn" color="primary" (click)="create( txtVideoId, txtGenre)">Create Song</button>

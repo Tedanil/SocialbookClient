@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PlaylistModule } from './playlist/playlist.module';
 import { RouterModule } from '@angular/router';
 import { HomeModule } from './home/home.module';
+import { VoteModule } from './vote/vote.module';
 
 
 
@@ -11,7 +12,8 @@ import { HomeModule } from './home/home.module';
   imports: [
     CommonModule,
     PlaylistModule,
-    HomeModule
+    HomeModule,
+    VoteModule
    
   ]
 })

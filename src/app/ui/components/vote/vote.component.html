@@ -1,0 +1,15 @@
+<div *ngFor="let video of videos">
+    <h2>{{videoData[video]?.title}}</h2>
+    <img [src]="videoData[video]?.thumbnail" alt="video thumbnail" />
+    <button (click)="vote(video)">Vote for this video</button>
+    <div class="progress-bar">
+      <div [style.width.%]="getVotePercentage(video)*100" class="progress-bar-fill"></div>
+    </div>
+    {{getVotePercentage(video) | percent:'1.0-0'}}
+  </div>
+  
+  
+  
+  
+  
+  
