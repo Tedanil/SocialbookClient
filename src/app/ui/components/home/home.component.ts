@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { BaseComponent, SpinnerType } from 'src/app/base/base.component';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/services/common/custom-toastr.service';
 
 @Component({
@@ -7,15 +9,18 @@ import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent extends BaseComponent implements OnInit {
 
-  constructor(private customToastr: CustomToastrService) { }
+  constructor(private customToastr: CustomToastrService, spinner: NgxSpinnerService) {
+    super(spinner)
+   }
 
   ngOnInit(): void {
     this.customToastr.message("Hello", "BAŞ",{
       messageType: ToastrMessageType.Warning,
       position: ToastrPosition.TopCenter
     } );
+    //this.showSpinner(SpinnerType.BallElasticDot)
   }
 
 }
