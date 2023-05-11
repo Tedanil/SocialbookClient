@@ -29,6 +29,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   private videoDuration: number;
   private timer: any;
   public disableVote = false;
+  public messages: string[] = [];
+
 
   constructor(private renderer: Renderer2, spinner: NgxSpinnerService, private songService: SongService,
     private toastrService: CustomToastrService, private youtubeService: YoutubeService, private cdRef: ChangeDetectorRef,
@@ -55,12 +57,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       }
     });
 
-    this.signalRService.on(HubUrls.MessageHub, ReceiveFunctions.MessageSent, message => {
-      this.toastrService.message("Hello", "ANANANANKE",{
-        messageType: ToastrMessageType.Warning,
-        position: ToastrPosition.TopRight
-      });
-    });
+     this.listenForMessages();
+    
 
     // Eğer YT henüz tanımlı değilse, YouTube Iframe API scriptini yükle
     if (!window['YT']) {
@@ -217,6 +215,36 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       });
     });
   }
+
+  async sendMessage(event: Event, message: string) {
+    event.preventDefault();
+    if (!message) {
+      return;
+    }
+  
+    try {
+      const hubConnection = await this.signalRService.start(HubUrls.MessageHub);
+      await hubConnection.invoke("SendMessage", message);
+      console.log('Message sent');
+    } catch (error) {
+      console.log('An error occurred while starting the connection or sending the message: ', error);
+    }
+  }
+
+  async listenForMessages() {
+    try {
+      const hubConnection = await this.signalRService.start(HubUrls.MessageHub);
+      hubConnection.on(ReceiveFunctions.MessageSent, (message) => {
+        this.messages.push(message); // here, instead of showing a toast notification, we're adding the message to the array
+      });
+    } catch (error) {
+      console.log('An error occurred while starting the connection or setting up message listening: ', error);
+    }
+  }
+  
+  
+  
+  
 
 
 }

@@ -17,20 +17,17 @@
   <div class="chat-container">
     <h2 class="chat-header">Canlı Sohbet</h2>
     <div class="chat-messages">
-      <div class="chat-message">
-        <span class="chat-user">Kullanıcı 1:</span>
-        <span class="chat-text">Merhaba, bu bir deneme mesajıdır.</span>
+      <div *ngFor="let message of messages">
+        {{ message }}
       </div>
-      <div class="chat-message">
-        <span class="chat-user">Kullanıcı 2:</span>
-        <span class="chat-text">Bu da başka bir deneme mesajıdır.</span>
-      </div>
-      <!-- Diğer mesajlar -->
     </div>
     <div class="chat-input">
-      <input type="text" placeholder="Bir mesaj yazın..." />
-      <button>Gönder</button>
+      <form (submit)="sendMessage($event, chatMessageInput.value)">
+        <input type="text" #chatMessageInput placeholder="Bir mesaj yazın..." />
+        <button type="submit">Gönder</button>
+      </form>
     </div>
+    
   </div>
   
   

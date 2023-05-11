@@ -5,10 +5,11 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
   providedIn: 'root'
 })
 export class SignalRService {
+  private hubConnection: HubConnection;
 
   constructor(@Inject("baseSignalRUrl") private baseSignalRUrl: string) { }
 
-  start(hubUrl: string) {
+  start(hubUrl: string): Promise<HubConnection> {
     hubUrl = this.baseSignalRUrl + hubUrl;
 
     const builder: HubConnectionBuilder = new HubConnectionBuilder();
@@ -17,23 +18,34 @@ export class SignalRService {
       .withAutomaticReconnect()
       .build();
 
-    hubConnection.start()
-      .then(() => console.log("Connected"))
-      .catch(error => setTimeout(() => this.start(hubUrl), 2000));
+    return hubConnection.start()
+      .then(() => {
+          console.log("Connected");
+          return hubConnection;
+      })
+      .catch(error => {
+          console.log("Error connecting, retrying in 2 seconds...");
+          return new Promise((resolve, reject) => {
+              setTimeout(() => this.start(hubUrl).then(resolve).catch(reject), 2000)
+          });
+      });
+}
 
-    hubConnection.onreconnected(connectionId => console.log("Reconnected"));
-    hubConnection.onreconnecting(error => console.log("Reconnecting"));
-    hubConnection.onclose(error => console.log("Close reconnection"));
-    return hubConnection;
-  }
 
-  invoke(hubUrl: string, procedureName: string, message: any, successCallBack?: (value) => void, errorCallBack?: (error) => void) {
-    this.start(hubUrl).invoke(procedureName, message)
-      .then(successCallBack)
-      .catch(errorCallBack);
-  }
 
-  on(hubUrl: string, procedureName: string, callBack: (...message: any) => void) {
-    this.start(hubUrl).on(procedureName, callBack);
+async invoke(hubUrl: string, procedureName: string, message: any, successCallBack?: (value) => void, errorCallBack?: (error) => void) {
+  const hubConnection = await this.start(hubUrl);
+  hubConnection.invoke(procedureName, message)
+    .then(successCallBack)
+    .catch(errorCallBack);
+}
+
+
+  on(procedureName: string, callBack: (...message: any) => void) {
+    if (this.hubConnection) {
+      this.hubConnection.on(procedureName, callBack);
+    } else {
+      console.error('HubConnection is not established. You need to call start() before subscribing to a method.');
+    }
   }
 }
