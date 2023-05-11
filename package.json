@@ -21,6 +21,7 @@
     "@angular/platform-browser-dynamic": "^14.0.0",
     "@angular/router": "^14.0.0",
     "@angular/youtube-player": "^13.0.0",
+    "@microsoft/signalr": "^7.0.5",
     "bootstrap": "^5.2.3",
     "ngx-spinner": "^14.0.0",
     "ngx-toastr": "^15.2.2",

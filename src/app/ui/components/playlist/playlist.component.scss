@@ -1,5 +1,104 @@
+
+
+
 :host {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+ 
+}
+
+.player-container {
+  width: 60%; 
+  /* Other styles */
+}
+
+.video-list {
+  width: 20%;
+  padding-top: 360px;
+  color: #e0e0e0;
+  
+  /* Other styles */
+}
+
+.video-item {
+  width: 200px;
+  margin-bottom: 1em; 
+  box-sizing: border-box;
+  
+}
+
+.video-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+  
+  
+}
+
+.chat-container {
+  width: 25%;
+  height: 500px;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.chat-header {
+  margin-bottom: 10px;
+}
+
+.chat-messages {
+  height: 80%;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.chat-message {
+  margin-bottom: 5px;
+}
+
+.chat-user {
+  font-weight: bold;
+}
+
+.chat-input {
+  display: flex;
+  justify-content: space-between;
+}
+
+.chat-input input {
+  width: 80%;
+}
+
+.chat-input button {
+  width: 18%;
+}
+
+.progress-bar {
+  width: 160%;
+  height: 20px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #0000ff;
+}

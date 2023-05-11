@@ -1,10 +1,52 @@
-<div #player></div>
+<div class="container">
+  
+  <div class="video-list">
+    <div *ngFor="let video of videos" class="video-item">
+      <div class="video-content">
+        <h2>{{videoData[video]?.title}}</h2>
+        <img [src]="videoData[video]?.thumbnail" alt="video thumbnail" />
+        <button style="color: #e0e0e0 !important;" (click)="vote(video)">Vote for this video</button>
+        <div class="progress-bar">
+          <div [style.width.%]="getVotePercentage(video)*100" class="progress-bar-fill"></div>
+        </div>
+        {{getVotePercentage(video) | percent:'1.0-0'}}
+      </div>
+    </div>
+  </div>
+  <div #player class="player-container"></div>
+  <div class="chat-container">
+    <h2 class="chat-header">Canlı Sohbet</h2>
+    <div class="chat-messages">
+      <div class="chat-message">
+        <span class="chat-user">Kullanıcı 1:</span>
+        <span class="chat-text">Merhaba, bu bir deneme mesajıdır.</span>
+      </div>
+      <div class="chat-message">
+        <span class="chat-user">Kullanıcı 2:</span>
+        <span class="chat-text">Bu da başka bir deneme mesajıdır.</span>
+      </div>
+      <!-- Diğer mesajlar -->
+    </div>
+    <div class="chat-input">
+      <input type="text" placeholder="Bir mesaj yazın..." />
+      <button>Gönder</button>
+    </div>
+  </div>
+  
+  
+  
+</div>
 
-<button #playButton (click)="startVideo()">Videoyu oynat</button>
 
 
 
-  <mat-form-field appearance="fill">
+
+
+<!-- <button #playButton (click)="startVideo()">Videoyu oynat</button> -->
+
+
+
+  <!-- <mat-form-field appearance="fill">
     <mat-label>VideoId</mat-label>
     <input matInput #txtVideoId>
   </mat-form-field>
@@ -13,4 +55,4 @@
     <input matInput #txtGenre>
   </mat-form-field>
   
-  <button mat-raised-button class="btn" color="primary" (click)="create( txtVideoId, txtGenre)">Create Song</button>
+  <button mat-raised-button class="btn" color="primary" (click)="create( txtVideoId, txtGenre)">Create Song</button> -->
