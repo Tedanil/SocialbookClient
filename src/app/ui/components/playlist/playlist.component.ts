@@ -2,8 +2,11 @@ import { AfterViewInit, Component, OnDestroy, ViewChild, ElementRef, Renderer2, 
 import { NgxSpinner, NgxSpinnerService } from 'ngx-spinner';
 import { interval, startWith, switchMap } from 'rxjs';
 import { BaseComponent, SpinnerType } from 'src/app/base/base.component';
+import { HubUrls } from 'src/app/constants/hub-urls';
+import { ReceiveFunctions } from 'src/app/constants/receive-functions';
 import { Song } from 'src/app/contracts/song';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/services/common/custom-toastr.service';
+import { SignalRService } from 'src/app/services/common/signalr.service';
 import { SongService } from 'src/app/services/common/song.service';
 import { YoutubeService } from 'src/app/services/common/youtube.service';
 
@@ -28,7 +31,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   public disableVote = false;
 
   constructor(private renderer: Renderer2, spinner: NgxSpinnerService, private songService: SongService,
-    private toastrService: CustomToastrService, private youtubeService: YoutubeService, private cdRef: ChangeDetectorRef) {
+    private toastrService: CustomToastrService, private youtubeService: YoutubeService, private cdRef: ChangeDetectorRef,
+    private signalRService: SignalRService) {
     super(spinner)
   } // Renderer2'yi enjekte et
 
@@ -38,6 +42,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   }
 
   ngOnInit() {
+    
     this.songService.getVideoIds((videoIds) => {
       this.videos = this.getRandomSubarray(videoIds, 3);
       for (let video of this.videos) {
@@ -50,6 +55,13 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       }
     });
 
+    this.signalRService.on(HubUrls.MessageHub, ReceiveFunctions.MessageSent, message => {
+      this.toastrService.message("Hello", "ANANANANKE",{
+        messageType: ToastrMessageType.Warning,
+        position: ToastrPosition.TopRight
+      });
+    });
+
     // Eğer YT henüz tanımlı değilse, YouTube Iframe API scriptini yükle
     if (!window['YT']) {
       const tag = document.createElement('script');
@@ -60,6 +72,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     window['onYouTubeIframeAPIReady'] = () => {
       this.init();
     };
+
+    
   }
 
   init() {
