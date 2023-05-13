@@ -22,7 +22,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   @ViewChild('playButton', { static: false }) playButton: ElementRef; // Düğmeye erişmek için
   private player: any;
   private ytEvent: any;
-  private videoId = '8tV2F871s1U'; // İstediğiniz video ID'si ile değiştirin.
+  private videoId = 'X7eklUJ9eb8'; // İstediğiniz video ID'si ile değiştirin.
   videos = [];
   videoData = {};
   videoVotes = {};
@@ -43,36 +43,40 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     this.init();
   }
 
-  ngOnInit() {
-    
+  async ngOnInit() {
     this.songService.getVideoIds((videoIds) => {
       this.videos = this.getRandomSubarray(videoIds, 3);
-      for (let video of this.videos) {
-        this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
-          this.videoData[video] = {
-            title: res.items[0].snippet.title,
-            thumbnail: res.items[0].snippet.thumbnails.medium.url,
-          };
-        });
-      }
+      this.songService.postVideoIds(this.videos, (response) => {
+        // API'dan dönen cevapla ilgili işlemler
+        this.videos = response;
+        for (let video of this.videos) {
+          this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
+            this.videoData[video] = {
+              title: res.items[0].snippet.title,
+              thumbnail: res.items[0].snippet.thumbnails.medium.url,
+            };
+            this.updateVoteListOnServer(); // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
+          });
+        }
+      });
+
     });
 
-     this.listenForMessages();
-    
+    this.listenForMessages();
+    //this.listenForVoteListUpdates(); // oylama listesi güncellemelerini dinle
 
-    // Eğer YT henüz tanımlı değilse, YouTube Iframe API scriptini yükle
     if (!window['YT']) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
       document.body.appendChild(tag);
     }
-    // API yüklemesi tamamlandığında initPlayer() yöntemini çağır
+
     window['onYouTubeIframeAPIReady'] = () => {
       this.init();
     };
-
-    
   }
+
+
 
   init() {
     if (window['YT']) {
@@ -107,7 +111,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
   onPlayerStateChange(event) {
     this.ytEvent = event.data;
-  
+
     if (this.ytEvent === window['YT'].PlayerState.PLAYING) {
       this.videoDuration = this.player.getDuration();
       this.timer = setInterval(() => {
@@ -118,11 +122,11 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
         }
       }, 1000);
     }
-  
+
     if (this.ytEvent === window['YT'].PlayerState.PAUSED) {
       clearInterval(this.timer);
     }
-  
+
     if (this.ytEvent === window['YT'].PlayerState.ENDED) {
       clearInterval(this.timer);
       this.disableVote = true;
@@ -135,37 +139,41 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
           nextVideoId = video;
         }
       }
-      
+
       if (nextVideoId) {
         this.videoId = nextVideoId;
         for (let video of this.videos) {
           this.videoData[video].votes = 0;
         }
         this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
-        
+
         this.songService.getVideoIds((videoIds) => {
           this.videos = this.getRandomSubarray(videoIds, 3);
           let loadedVideos = 0; // Keep track of how many videos have loaded
-          for (let video of this.videos) {
-            this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
-              this.videoData[video] = {
-                title: res.items[0].snippet.title,
-                thumbnail: res.items[0].snippet.thumbnails.medium.url,
-                votes: 0 // initialize votes to 0
-              };
-              loadedVideos++;
-              if (loadedVideos === this.videos.length) {
-                // Only call detectChanges() after all videos have loaded
-                this.cdRef.detectChanges();
-              }
-            });
-          }
+          this.songService.updatePostVideoIds(this.videos, (response) => {
+            this.videos = response;
+            for (let video of this.videos) {
+              this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
+                this.videoData[video] = {
+                  title: res.items[0].snippet.title,
+                  thumbnail: res.items[0].snippet.thumbnails.medium.url,
+                  votes: 0 // initialize votes to 0
+                };
+                loadedVideos++;
+                if (loadedVideos === this.videos.length) {
+                  // Only call detectChanges() after all videos have loaded
+                  this.cdRef.detectChanges();
+                }
+              });
+            }
+          });
+
         });
       }
-      
+
     }
   }
-  
+
 
 
   ngOnDestroy() {
@@ -221,7 +229,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     if (!message) {
       return;
     }
-  
+
     try {
       const hubConnection = await this.signalRService.start(HubUrls.MessageHub);
       await hubConnection.invoke("SendMessage", message);
@@ -241,10 +249,38 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       console.log('An error occurred while starting the connection or setting up message listening: ', error);
     }
   }
-  
-  
-  
-  
+
+  async updateVoteListOnServer() {
+    try {
+      const hubConnection = await this.signalRService.start(HubUrls.VoteHub);
+      console.log("BAĞLANDIK AMK");
+      await hubConnection.invoke("UpdateVoteList", this.videos, this.videoData);
+      console.log('Vote list sent');
+    } catch (error) {
+      console.log('An error occurred while starting the connection or sending the vote list: ', error);
+    }
+  }
+
+  async listenForVoteListUpdates() {
+    try {
+      const hubConnection = await this.signalRService.start(HubUrls.VoteHub);
+      hubConnection.on(ReceiveFunctions.VoteListUpdated, (voteList) => {
+        console.log(voteList);
+        this.videos = voteList.videos;
+        this.videoData = voteList.videoData;
+        this.cdRef.detectChanges();
+      });
+
+
+
+    } catch (error) {
+      console.log('An error occurred while starting the connection or setting up vote list listening: ', error);
+    }
+  }
+
+
+
+
 
 
 }

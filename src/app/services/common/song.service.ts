@@ -21,11 +21,36 @@ export class SongService {
     this.httpClientService.get<string[]>({
       controller: "songs"
     })
-    .subscribe(result => {
-      if (successCallBack) {
-        successCallBack(result);
-      }
-    });
+      .subscribe(result => {
+        if (successCallBack) {
+          successCallBack(result);
+        }
+      });
   }
-  
+
+  postVideoIds(videoIds: string[], successCallBack?: any) {
+    this.httpClientService.post<string[]>({
+      controller: "songs",
+      action: "videoIds"
+    }, videoIds)
+      .subscribe(result => {
+        if (successCallBack) {
+          successCallBack(result);
+        }
+      });
+  }
+
+  updatePostVideoIds(videoIds: string[], successCallBack?: any) {
+    this.httpClientService.post<string[]>({
+      controller: "songs",
+      action: "updateVideoIds"
+    }, videoIds)
+      .subscribe(result => {
+        if (successCallBack) {
+          successCallBack(result);
+        }
+      });
+  }
+
+
 }
