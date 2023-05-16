@@ -27,7 +27,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   private videoDuration: number;
   videos = [];
   videoData = {};
-  videoVotes = {}; 
+  videoVotes = {};
   private timer: any;
   public disableVote = false;
   public messages: string[] = [];
@@ -53,7 +53,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   }
 
   async ngOnInit() {
-    this.songService.getCurrentVideoId( (response) => {
+    this.songService.getCurrentVideoId((response) => {
       this.videoId = response.videoId;
       this.videoDuration = parseFloat(response.videoTime);
 
@@ -112,7 +112,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   startVideo() {
     // videoDuration string to number
     const startSeconds = Math.round(this.videoDuration);
-  
+
     this.player = new window['YT'].Player(this.playerElement.nativeElement, {
       videoId: this.videoId,
       events: {
@@ -129,7 +129,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       }
     });
   }
-  
+
 
   onPlayerStateChange(event) {
     this.ytEvent = event.data;
@@ -155,8 +155,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       clearInterval(this.timer);
     }
 
-   
-    
+
+
 
     this.updateVideoStateOnServer(this.videoId, isPlaying);
 
@@ -182,41 +182,56 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
           this.updateVoteListOnServer(video);
         }
         this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
-        let videoIdAndTime = new VideoIdAndTime();
-        videoIdAndTime.videoId = this.videoId;
-        videoIdAndTime.videoTime = this.videoDuration.toString();
-    
-        this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
-         
-          
+       
 
-        this.songService.getVideoIds((videoIds) => {
-          this.videos = this.getRandomSubarray(videoIds, 3);
-          let loadedVideos = 0; // Keep track of how many videos have loaded
-          this.songService.updatePostVideoIds(this.videos, (response) => {
-            this.videos = response;
-            for (let video of this.videos) {
-              this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
-                this.videoData[video] = {
-                  title: res.items[0].snippet.title,
-                  thumbnail: res.items[0].snippet.thumbnails.medium.url,
-                  votes: 0 // initialize votes to 0
-                };
-                loadedVideos++;
-                if (loadedVideos === this.videos.length) {
-                  // Only call detectChanges() after all videos have loaded
-                  this.cdRef.detectChanges();
-                }
+          this.songService.getVideoIds((videoIds) => {
+            this.videos = this.getRandomSubarray(videoIds, 3);
+            let loadedVideos = 0; // Keep track of how many videos have loaded
+            this.songService.updatePostVideoIds(this.videos, (response) => {
+              this.videos = response;
+              for (let video of this.videos) {
+                this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
+                  this.videoData[video] = {
+                    title: res.items[0].snippet.title,
+                    thumbnail: res.items[0].snippet.thumbnails.medium.url,
+                    votes: 0 // initialize votes to 0
+                  };
+                  loadedVideos++;
+                  if (loadedVideos === this.videos.length) {
+                    // Only call detectChanges() after all videos have loaded
+                    this.cdRef.detectChanges();
+                  }
+                });
+              }
+            });
+            
+            
+            
+            this.youtubeService.getVideoInfoWithContentDetails(this.videoId).subscribe((res: any) => {
+              console.log("HAHAHAHAHHAHA");
+              console.log(res);
+              let duration = res.items[0].contentDetails.duration; // Duration bilgisi burada alınıyor
+              let videoDurationInSeconds = this.convertDurationToSeconds(duration); // Duration saniyeye çevriliyor
+              let videoIdAndTime = new VideoIdAndTime();
+              videoIdAndTime.videoId = this.videoId;
+              videoIdAndTime.videoTime = videoDurationInSeconds.toString(); 
+            
+              // videoIdAndTime nesnesi burada kullanıma hazır
+              this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
+    
               });
-            }
+            });
+            
+            
+            
+            
+
           });
 
-        });
-    
-        });
-    
-
         
+
+
+
       }
 
     }
@@ -394,6 +409,15 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       }
     });
   }
+
+  convertDurationToSeconds(duration: string): number {
+    let match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    let hours = parseInt((match[1] || '').replace(/\D/g,''),10) || 0;
+    let minutes = parseInt((match[2] || '').replace(/\D/g,''),10) || 0;
+    let seconds = parseInt((match[3] || '').replace(/\D/g,''),10) || 0;
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+  
 
 
 

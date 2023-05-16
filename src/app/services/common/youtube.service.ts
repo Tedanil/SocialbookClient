@@ -12,4 +12,10 @@ export class YoutubeService {
       `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=AIzaSyC2eC8F6AKnTYkj4yDbl_MehUfdcJfQbn0`
     );
   }
+
+  getVideoInfoWithContentDetails(videoId: string) {
+    return this.http.get(
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=AIzaSyC2eC8F6AKnTYkj4yDbl_MehUfdcJfQbn0`
+    );
+  }
 }
