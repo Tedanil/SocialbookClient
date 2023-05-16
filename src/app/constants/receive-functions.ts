@@ -1,5 +1,6 @@
 export enum ReceiveFunctions {
     MessageSent = "receiveMessageSent",
-    VoteListUpdated = "receiveVoteListUpdated"
+    VoteListUpdated = "receiveVoteListUpdated",
+    VideoStateUpdated = "receiveVideoStateUpdated"
    
 }

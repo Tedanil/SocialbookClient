@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { Song } from 'src/app/contracts/song';
+import { VideoIdAndTime } from 'src/app/contracts/videoIdAndTime';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +52,32 @@ export class SongService {
         }
       });
   }
+
+  updateCurrentVideoId(videoIdAndTime: VideoIdAndTime, successCallBack?: any) {
+    this.httpClientService.post<any>({
+      controller: "songs",
+      action: "updateCurrentVideoId"
+    }, videoIdAndTime) // videoId and videoTime as an object
+      .subscribe(result => {
+        if (successCallBack) {
+          successCallBack(result);
+        }
+      });
+  }
+
+  getCurrentVideoId(successCallBack?: any) {
+    this.httpClientService.get<VideoIdAndTime>({
+      controller: "songs",
+      action: "getCurrentVideoId"
+    })
+      .subscribe(result => {
+        if (successCallBack) {
+          successCallBack(result);
+        }
+      });
+  }
+  
+
 
 
 }

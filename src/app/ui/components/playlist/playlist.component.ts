@@ -1,10 +1,11 @@
 import { AfterViewInit, Component, OnDestroy, ViewChild, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
-import { NgxSpinner, NgxSpinnerService } from 'ngx-spinner';
+import { DEFAULTS, NgxSpinner, NgxSpinnerService } from 'ngx-spinner';
 import { interval, startWith, switchMap } from 'rxjs';
 import { BaseComponent, SpinnerType } from 'src/app/base/base.component';
 import { HubUrls } from 'src/app/constants/hub-urls';
 import { ReceiveFunctions } from 'src/app/constants/receive-functions';
 import { Song } from 'src/app/contracts/song';
+import { VideoIdAndTime } from 'src/app/contracts/videoIdAndTime';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/services/common/custom-toastr.service';
 import { SignalRService } from 'src/app/services/common/signalr.service';
 import { SongService } from 'src/app/services/common/song.service';
@@ -22,14 +23,22 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   @ViewChild('playButton', { static: false }) playButton: ElementRef; // Düğmeye erişmek için
   private player: any;
   private ytEvent: any;
-  private videoId = 'X7eklUJ9eb8'; // İstediğiniz video ID'si ile değiştirin.
+  private videoId = '5OeoVyUOorY'; // İstediğiniz video ID'si ile değiştirin.
+  private videoDuration: number;
   videos = [];
   videoData = {};
-  videoVotes = {};
-  private videoDuration: number;
+  videoVotes = {}; 
   private timer: any;
   public disableVote = false;
   public messages: string[] = [];
+  private done: boolean = false;
+  private seekTime: number = 0;
+  private currentVideoState = {
+    videoId: null,
+    isPlaying: false,
+    startTime: null,
+  };
+
 
 
   constructor(private renderer: Renderer2, spinner: NgxSpinnerService, private songService: SongService,
@@ -44,6 +53,12 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   }
 
   async ngOnInit() {
+    this.songService.getCurrentVideoId( (response) => {
+      this.videoId = response.videoId;
+      this.videoDuration = parseFloat(response.videoTime);
+
+    });
+    this.listenForVoteListUpdates();
     this.songService.getVideoIds((videoIds) => {
       this.videos = this.getRandomSubarray(videoIds, 3);
       this.songService.postVideoIds(this.videos, (response) => {
@@ -55,7 +70,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
               title: res.items[0].snippet.title,
               thumbnail: res.items[0].snippet.thumbnails.medium.url,
             };
-            this.updateVoteListOnServer(); // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
+            // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
           });
         }
       });
@@ -63,6 +78,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     });
 
     this.listenForMessages();
+
+
     //this.listenForVoteListUpdates(); // oylama listesi güncellemelerini dinle
 
     if (!window['YT']) {
@@ -74,6 +91,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     window['onYouTubeIframeAPIReady'] = () => {
       this.init();
     };
+
+    this.listenForVideoStateUpdates();
   }
 
 
@@ -91,28 +110,36 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   }
 
   startVideo() {
+    // videoDuration string to number
+    const startSeconds = Math.round(this.videoDuration);
+  
     this.player = new window['YT'].Player(this.playerElement.nativeElement, {
       videoId: this.videoId,
       events: {
         'onStateChange': this.onPlayerStateChange.bind(this),
-
       },
       playerVars: {
         'autoplay': 1,
-        'controls': 0, // Kontrolleri devre dışı bırakın.
-        'disablekb': 1, // Klavye kontrollerini devre dışı bırakın.
-        'modestbranding': 1, // YouTube logosunu gizleyin.
+        'controls': 0, // Disable controls.
+        'disablekb': 1, // Disable keyboard controls.
+        'modestbranding': 1, // Hide YouTube logo.
         'rel': 0,
-        'showinfo': 0 // Video başlığı ve yükleyici bilgilerini gizleyin.
-
+        'showinfo': 0, // Hide video title and uploader info.
+        'start': startSeconds
       }
     });
   }
+  
 
   onPlayerStateChange(event) {
     this.ytEvent = event.data;
 
-    if (this.ytEvent === window['YT'].PlayerState.PLAYING) {
+    const isPlaying = this.ytEvent === window['YT'].PlayerState.PLAYING;
+    const isPaused = this.ytEvent === window['YT'].PlayerState.PAUSED;
+    const isEnded = this.ytEvent === window['YT'].PlayerState.ENDED;
+
+    if (isPlaying) {
+
       this.videoDuration = this.player.getDuration();
       this.timer = setInterval(() => {
         const time = this.player.getCurrentTime();
@@ -121,14 +148,22 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
           this.disableVote = true;
         }
       }, 1000);
-    }
+      // Update the video state on the server
 
-    if (this.ytEvent === window['YT'].PlayerState.PAUSED) {
+    }
+    else if (isPaused || isEnded) {
       clearInterval(this.timer);
     }
 
-    if (this.ytEvent === window['YT'].PlayerState.ENDED) {
-      clearInterval(this.timer);
+   
+    
+
+    this.updateVideoStateOnServer(this.videoId, isPlaying);
+
+
+
+
+    if (isEnded) {
       this.disableVote = true;
       let maxVotes = -1;
       let nextVideoId: string;
@@ -144,8 +179,16 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
         this.videoId = nextVideoId;
         for (let video of this.videos) {
           this.videoData[video].votes = 0;
+          this.updateVoteListOnServer(video);
         }
         this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
+        let videoIdAndTime = new VideoIdAndTime();
+        videoIdAndTime.videoId = this.videoId;
+        videoIdAndTime.videoTime = this.videoDuration.toString();
+    
+        this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
+         
+          
 
         this.songService.getVideoIds((videoIds) => {
           this.videos = this.getRandomSubarray(videoIds, 3);
@@ -169,6 +212,11 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
           });
 
         });
+    
+        });
+    
+
+        
       }
 
     }
@@ -197,8 +245,10 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     }
     this.videoData[video].votes++;
     console.log(`User voted for video: ${video}`);
-    this.cdRef.detectChanges();  // Add this line
+    this.updateVoteListOnServer(video);
+    this.cdRef.detectChanges();
   }
+
 
   getVotePercentage(video: string) {
     const totalVotes = Object.values(this.videoData).reduce((total: number, videoData: any) => total + (videoData.votes || 0), 0);
@@ -250,33 +300,106 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     }
   }
 
-  async updateVoteListOnServer() {
+  async updateVoteListOnServer(video: string) {
     try {
       const hubConnection = await this.signalRService.start(HubUrls.VoteHub);
-      console.log("BAĞLANDIK AMK");
-      await hubConnection.invoke("UpdateVoteList", this.videos, this.videoData);
+      console.log("Connected");
+      await hubConnection.invoke("UpdateVoteList", video, this.videoData[video]);
       console.log('Vote list sent');
     } catch (error) {
       console.log('An error occurred while starting the connection or sending the vote list: ', error);
     }
   }
 
+
+
   async listenForVoteListUpdates() {
     try {
       const hubConnection = await this.signalRService.start(HubUrls.VoteHub);
-      hubConnection.on(ReceiveFunctions.VoteListUpdated, (voteList) => {
-        console.log(voteList);
-        this.videos = voteList.videos;
-        this.videoData = voteList.videoData;
-        this.cdRef.detectChanges();
+      hubConnection.on(ReceiveFunctions.VoteListUpdated, (voteUpdate) => {
+        console.log(voteUpdate);
+        if (voteUpdate.videoId && voteUpdate.videoData) {
+          this.videoData[voteUpdate.videoId].votes = voteUpdate.videoData.votes;
+          this.cdRef.detectChanges();
+        }
       });
-
-
-
     } catch (error) {
       console.log('An error occurred while starting the connection or setting up vote list listening: ', error);
     }
   }
+
+  async updateVideoStateOnServer(videoId: string, isPlaying: boolean) {
+    try {
+      const hubConnection = await this.signalRService.start(HubUrls.PlayerHub);
+      console.log("Connected");
+      await hubConnection.invoke("PlayVideo", videoId, isPlaying);
+      console.log('Video state sent');
+    } catch (error) {
+      console.log('An error occurred while starting the connection or sending the video state: ', error);
+    }
+  }
+
+  private hubConnection: any;
+  async listenForVideoStateUpdates() {
+    if (!this.hubConnection) {
+      try {
+        this.hubConnection = await this.signalRService.start(HubUrls.PlayerHub);
+        this.hubConnection.on(ReceiveFunctions.VideoStateUpdated, (videoState) => {
+          if (!videoState || !videoState.videoId || videoState.isPlaying === undefined || !videoState.startTime) {
+            console.error('Invalid videoState received: ', videoState);
+            return;
+          }
+          console.log("aNNANANANAN");
+
+
+          console.log(videoState);
+          if (videoState.videoId !== this.currentVideoState.videoId ||
+            videoState.isPlaying !== this.currentVideoState.isPlaying ||
+            videoState.startTime !== this.currentVideoState.startTime) {
+            //this.startVideoPlayback(videoState.videoId, videoState.startTime);
+            //this.player.loadVideoById(videoState.videoId);
+
+          }
+        });
+      }
+      catch (error) {
+        console.log('An error occurred while starting the connection or setting up video state listening: ', error);
+      }
+    }
+
+  }
+
+  startVideoPlayback(videoId: string, startTime: Date) {
+    this.done = false;
+    this.seekTime = 0;
+    const videoPlayer = this.player;
+
+    videoPlayer.loadVideoById(videoId);
+
+    const currentTime = new Date();
+    const timeDifferenceInSeconds = (currentTime.getTime() - new Date(startTime).getTime()) / 1000;
+
+    this.currentVideoState = {
+      videoId: videoId,
+      isPlaying: true,
+      startTime: startTime,
+    };
+    this.seekTime = timeDifferenceInSeconds > 0 ? timeDifferenceInSeconds : 0;
+    this.done = false;
+
+    videoPlayer.addEventListener('onStateChange', (event) => {
+      if (event.data == window['YT'].PlayerState.PLAYING && !this.done) {
+        videoPlayer.seekTo(this.seekTime, true);
+        this.done = true;
+      }
+    });
+  }
+
+
+
+
+
+
 
 
 
