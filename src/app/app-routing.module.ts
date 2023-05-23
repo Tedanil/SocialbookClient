@@ -8,6 +8,8 @@ const routes: Routes = [
   {path: "playlist", loadChildren: () => import("./ui/components/playlist/playlist.module").then(module => module.PlaylistModule)},
   {path: "vote", loadChildren: () => import("./ui/components/vote/vote.module").then(module => module.VoteModule)},
   {path: "register", loadChildren: () => import("./ui/components/register/register.module").then(module => module.RegisterModule)},
+  {path: "login", loadChildren: () => import("./ui/components/login/login.module").then(module => module.LoginModule)},
+
 
 
     

@@ -9,11 +9,12 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { BaseComponent } from './base/base.component';
 import { HttpClientModule } from '@angular/common/http';
+import { LoginComponent } from './ui/components/login/login.component';
 
 
 @NgModule({
   declarations: [
-    AppComponent,
+    AppComponent, LoginComponent
   ],
   imports: [
     BrowserModule,
