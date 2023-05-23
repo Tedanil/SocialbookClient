@@ -59,7 +59,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
     });
     this.listenForVoteListUpdates();
-    this.songService.getVideoIds((videoIds) => {
+    this.songService.getVideoIds((response) => {
+      let videoIds = response.videoIds;
       this.videos = this.getRandomSubarray(videoIds, 3);
       this.songService.postVideoIds(this.videos, (response) => {
         // API'dan dönen cevapla ilgili işlemler
@@ -184,7 +185,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
         this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
        
 
-          this.songService.getVideoIds((videoIds) => {
+          this.songService.getVideoIds((response) => {
+            let videoIds = response.videoIds;
             this.videos = this.getRandomSubarray(videoIds, 3);
             let loadedVideos = 0; // Keep track of how many videos have loaded
             this.songService.updatePostVideoIds(this.videos, (response) => {

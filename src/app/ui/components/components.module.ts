@@ -4,6 +4,7 @@ import { PlaylistModule } from './playlist/playlist.module';
 import { RouterModule } from '@angular/router';
 import { HomeModule } from './home/home.module';
 import { VoteModule } from './vote/vote.module';
+import { RegisterModule } from './register/register.module';
 
 
 
@@ -13,7 +14,8 @@ import { VoteModule } from './vote/vote.module';
     CommonModule,
     PlaylistModule,
     HomeModule,
-    VoteModule
+    VoteModule,
+    RegisterModule
    
   ]
 })
