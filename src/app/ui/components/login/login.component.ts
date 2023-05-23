@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { BaseComponent, SpinnerType } from 'src/app/base/base.component';
+import { UserAuthService } from 'src/app/services/common/user-auth.service';
 import { UserService } from 'src/app/services/common/user.service';
 
 @Component({
@@ -10,7 +11,7 @@ import { UserService } from 'src/app/services/common/user.service';
 })
 export class LoginComponent extends BaseComponent implements OnInit {
 
-  constructor(private userService: UserService, spinner: NgxSpinnerService) {
+  constructor(private userAuthService: UserAuthService, spinner: NgxSpinnerService) {
     super(spinner)
   }
 
@@ -19,6 +20,6 @@ export class LoginComponent extends BaseComponent implements OnInit {
 
   async login(usernameOrEmail: string, password: string) {
     this.showSpinner(SpinnerType.BallElasticDot);
-    await this.userService.login(usernameOrEmail, password, () => this.hideSpinner(SpinnerType.BallElasticDot));
+    await this.userAuthService.login(usernameOrEmail, password, () => this.hideSpinner(SpinnerType.BallElasticDot));
   }
 }
