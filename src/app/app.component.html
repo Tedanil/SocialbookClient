@@ -12,6 +12,14 @@
           <li class="nav-item">
             <a class="nav-link text-white" routerLink="/register">Kayıt Ol</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" routerLink="login" *ngIf="!authService.isAuthenticated">Giriş
+              Yap</a>
+          </li>
+          <li>
+            <button mat-menu-item routerLink="" style="color:red;cursor:pointer;" (click)="signOut()"
+            *ngIf="authService.isAuthenticated">Çıkış Yap</button>  
+          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Dropdown
