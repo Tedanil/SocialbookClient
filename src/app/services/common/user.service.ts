@@ -40,6 +40,15 @@ export class UserService {
 
     return await firstValueFrom(observable);  
   }
+  async updateAllVoteCounts(): Promise<any> {
+    
+    const observable: Observable<any> = this.httpClientService.post({
+      controller: "users",
+      action: "updateallvotecounts"
+    }, {});
+
+    return await firstValueFrom(observable);  
+  }
 
   
 }

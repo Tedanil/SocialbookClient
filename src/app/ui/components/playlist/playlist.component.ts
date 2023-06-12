@@ -143,7 +143,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   }
 
 
-  onPlayerStateChange(event) {
+ async onPlayerStateChange(event) {
     this.ytEvent = event.data;
 
     const isPlaying = this.ytEvent === window['YT'].PlayerState.PLAYING;
@@ -241,13 +241,17 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
         });
 
+        this.userService.updateAllVoteCounts();
+        
 
-
-
-
+       
       }
+      
 
     }
+    const token: string = localStorage.getItem("refreshToken");
+        this.currentUser = await this.userService.getUserByToken(token);
+
   }
 
 
