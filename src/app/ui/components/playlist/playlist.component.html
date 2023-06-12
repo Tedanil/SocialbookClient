@@ -5,7 +5,8 @@
       <div class="video-content">
         <h2>{{videoData[video]?.title}}</h2>
         <img [src]="videoData[video]?.thumbnail" alt="video thumbnail" />
-        <button [disabled]="currentUser.voteCount <= 0" style="color: #e0e0e0 !important;" (click)="vote(video)">Vote for this video</button>
+        <button *ngIf="authService.isAuthenticated" [disabled]="currentUser.voteCount <= 0" style="color: #e0e0e0 !important;" (click)="vote(video)">Vote for this video</button>
+        <button *ngIf="!authService.isAuthenticated" routerLink="/login"  style="color: #e0e0e0 !important;" >Oylamak için giriş yapınız</button>
         <div class="progress-bar">
           <div [style.width.%]="getVotePercentage(video)*100" class="progress-bar-fill"></div>
         </div>

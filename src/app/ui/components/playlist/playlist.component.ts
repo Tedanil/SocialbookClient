@@ -7,6 +7,7 @@ import { ReceiveFunctions } from 'src/app/constants/receive-functions';
 import { Song } from 'src/app/contracts/song';
 import { User_Response } from 'src/app/contracts/users/user_response';
 import { VideoIdAndTime } from 'src/app/contracts/videoIdAndTime';
+import { AuthService } from 'src/app/services/common/auth.service';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/services/common/custom-toastr.service';
 import { SignalRService } from 'src/app/services/common/signalr.service';
 import { SongService } from 'src/app/services/common/song.service';
@@ -46,7 +47,9 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
   constructor(private renderer: Renderer2, spinner: NgxSpinnerService, private songService: SongService,
     private toastrService: CustomToastrService, private youtubeService: YoutubeService, private cdRef: ChangeDetectorRef,
-    private signalRService: SignalRService, private userService: UserService) {
+    private signalRService: SignalRService, private userService: UserService, public authService: AuthService) {
+    authService.identityCheck();   
+
     super(spinner)
   } // Renderer2'yi enjekte et
 
@@ -264,14 +267,17 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     return shuffled.slice(0, size);
   }
 
-  vote(video: string) {
+ async vote(video: string) {
     if (!this.videoData[video].votes) {
       this.videoData[video].votes = 0;
     }
     this.videoData[video].votes++;
+    await this.userService.updateUserInfo(this.currentUser.userId);
     console.log(`User voted for video: ${video}`);
     this.updateVoteListOnServer(video);
     this.cdRef.detectChanges();
+    const token: string = localStorage.getItem("refreshToken");
+    this.currentUser = await this.userService.getUserByToken(token);
   }
 
 

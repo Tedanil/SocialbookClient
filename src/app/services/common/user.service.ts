@@ -27,16 +27,19 @@ export class UserService {
       controller: "users",
       action: "getuser"
     }, {refreshToken});
-   
-    
-
     const userData: User_Response = await firstValueFrom(observable);
     return userData;
-    
-    
-
-  
   }
 
+  async updateUserInfo(userId: string): Promise<any> {
+    
+    const observable: Observable<any> = this.httpClientService.post({
+      controller: "users",
+      action: "updateuserinfos"
+    }, {userId});
 
+    return await firstValueFrom(observable);  
+  }
+
+  
 }
