@@ -5,10 +5,12 @@ import { BaseComponent, SpinnerType } from 'src/app/base/base.component';
 import { HubUrls } from 'src/app/constants/hub-urls';
 import { ReceiveFunctions } from 'src/app/constants/receive-functions';
 import { Song } from 'src/app/contracts/song';
+import { User_Response } from 'src/app/contracts/users/user_response';
 import { VideoIdAndTime } from 'src/app/contracts/videoIdAndTime';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/services/common/custom-toastr.service';
 import { SignalRService } from 'src/app/services/common/signalr.service';
 import { SongService } from 'src/app/services/common/song.service';
+import { UserService } from 'src/app/services/common/user.service';
 import { YoutubeService } from 'src/app/services/common/youtube.service';
 
 
@@ -38,12 +40,13 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     isPlaying: false,
     startTime: null,
   };
+  currentUser: User_Response;
 
 
 
   constructor(private renderer: Renderer2, spinner: NgxSpinnerService, private songService: SongService,
     private toastrService: CustomToastrService, private youtubeService: YoutubeService, private cdRef: ChangeDetectorRef,
-    private signalRService: SignalRService) {
+    private signalRService: SignalRService, private userService: UserService) {
     super(spinner)
   } // Renderer2'yi enjekte et
 
@@ -94,6 +97,11 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     };
 
     this.listenForVideoStateUpdates();
+
+
+    const token: string = localStorage.getItem("refreshToken");
+    this.currentUser = await this.userService.getUserByToken(token);
+    console.log(this.currentUser);
   }
 
 
@@ -183,54 +191,54 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
           this.updateVoteListOnServer(video);
         }
         this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
-       
 
-          this.songService.getVideoIds((response) => {
-            let videoIds = response.videoIds;
-            this.videos = this.getRandomSubarray(videoIds, 3);
-            let loadedVideos = 0; // Keep track of how many videos have loaded
-            this.songService.updatePostVideoIds(this.videos, (response) => {
-              this.videos = response;
-              for (let video of this.videos) {
-                this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
-                  this.videoData[video] = {
-                    title: res.items[0].snippet.title,
-                    thumbnail: res.items[0].snippet.thumbnails.medium.url,
-                    votes: 0 // initialize votes to 0
-                  };
-                  loadedVideos++;
-                  if (loadedVideos === this.videos.length) {
-                    // Only call detectChanges() after all videos have loaded
-                    this.cdRef.detectChanges();
-                  }
-                });
-              }
-            });
-            
-            
-            
-            this.youtubeService.getVideoInfoWithContentDetails(this.videoId).subscribe((res: any) => {
-              console.log("HAHAHAHAHHAHA");
-              console.log(res);
-              let duration = res.items[0].contentDetails.duration; // Duration bilgisi burada alınıyor
-              let videoDurationInSeconds = this.convertDurationToSeconds(duration); // Duration saniyeye çevriliyor
-              let videoIdAndTime = new VideoIdAndTime();
-              videoIdAndTime.videoId = this.videoId;
-              videoIdAndTime.videoTime = videoDurationInSeconds.toString(); 
-            
-              // videoIdAndTime nesnesi burada kullanıma hazır
-              this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
-    
+
+        this.songService.getVideoIds((response) => {
+          let videoIds = response.videoIds;
+          this.videos = this.getRandomSubarray(videoIds, 3);
+          let loadedVideos = 0; // Keep track of how many videos have loaded
+          this.songService.updatePostVideoIds(this.videos, (response) => {
+            this.videos = response;
+            for (let video of this.videos) {
+              this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
+                this.videoData[video] = {
+                  title: res.items[0].snippet.title,
+                  thumbnail: res.items[0].snippet.thumbnails.medium.url,
+                  votes: 0 // initialize votes to 0
+                };
+                loadedVideos++;
+                if (loadedVideos === this.videos.length) {
+                  // Only call detectChanges() after all videos have loaded
+                  this.cdRef.detectChanges();
+                }
               });
-            });
-            
-            
-            
-            
-
+            }
           });
 
-        
+
+
+          this.youtubeService.getVideoInfoWithContentDetails(this.videoId).subscribe((res: any) => {
+            console.log("HAHAHAHAHHAHA");
+            console.log(res);
+            let duration = res.items[0].contentDetails.duration; // Duration bilgisi burada alınıyor
+            let videoDurationInSeconds = this.convertDurationToSeconds(duration); // Duration saniyeye çevriliyor
+            let videoIdAndTime = new VideoIdAndTime();
+            videoIdAndTime.videoId = this.videoId;
+            videoIdAndTime.videoTime = videoDurationInSeconds.toString();
+
+            // videoIdAndTime nesnesi burada kullanıma hazır
+            this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
+
+            });
+          });
+
+
+
+
+
+        });
+
+
 
 
 
@@ -414,12 +422,12 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
   convertDurationToSeconds(duration: string): number {
     let match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-    let hours = parseInt((match[1] || '').replace(/\D/g,''),10) || 0;
-    let minutes = parseInt((match[2] || '').replace(/\D/g,''),10) || 0;
-    let seconds = parseInt((match[3] || '').replace(/\D/g,''),10) || 0;
+    let hours = parseInt((match[1] || '').replace(/\D/g, ''), 10) || 0;
+    let minutes = parseInt((match[2] || '').replace(/\D/g, ''), 10) || 0;
+    let seconds = parseInt((match[3] || '').replace(/\D/g, ''), 10) || 0;
     return hours * 3600 + minutes * 60 + seconds;
   }
-  
+
 
 
 
