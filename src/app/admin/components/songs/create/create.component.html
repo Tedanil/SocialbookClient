@@ -1,0 +1,21 @@
+<mat-form-field appearance="fill"  >
+    <mat-label>VideoId</mat-label>
+    <input matInput #txtVideoId>
+  </mat-form-field>
+  <mat-form-field appearance="fill"  >
+    <mat-label>Video Genre</mat-label>
+    <input matInput #txtGenre>
+  </mat-form-field>
+  <!-- <div class="input-group mb-3">
+    <select class="custom-select" #txtCategoryName >
+      <option style="background-color: rgba(195, 48, 48, 0.04);" value="brushes" selected>Fırçalar ve Süpürge Başlıkları</option>
+      <option value="vacuum" >Elektrikli Süpürge</option>
+      <option value="dustBag">Toz Torbası</option>
+      <option value="filters">Filtreler ve Süpürge Aksesuar</option>
+
+    </select>
+  </div> -->
+
+  <button mat-raised-button class="btn" (click)="create( txtVideoId, txtGenre )" color="primary" >Create Product </button>
+
+  
