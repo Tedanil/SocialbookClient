@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClientService } from './http-client.service';
 import { Song } from 'src/app/contracts/song';
 import { VideoIdAndTime } from 'src/app/contracts/videoIdAndTime';
+import { List_Song } from 'src/app/contracts/songs/list_song';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +18,23 @@ export class SongService {
       .subscribe(result => {
         successCallBack();
       });
+  }
+
+  async getSongs(page: number = 0, size: number = 5, successCallBack?: () => void,
+   errorCallBack?: (errorMessage: string) => void): Promise<{totalSongCount: number;   songs: List_Song[] }> {
+    const promiseData: Promise<{totalSongCount: number;   songs: List_Song[]}> = this.httpClientService.get< {totalSongCount: number;   songs: List_Song[] }>({
+      controller: "songs",
+      queryString: `page=${page}&size=${size}`
+      
+
+    },).toPromise();
+
+    promiseData.then(d => successCallBack())
+       .catch((errorResponse: HttpErrorResponse) => errorCallBack(errorResponse.message));
+       
+       
+    return await promiseData;
+     
   }
 
   getVideoIds(successCallBack?: any) {

@@ -16,7 +16,7 @@ export class SongsComponent implements OnInit {
   ngOnInit(): void {
   }
   createdSong(song: Song) {
-    this.ListComponents.getProducts();
+    this.ListComponents.getSongs();
 
   }
 
