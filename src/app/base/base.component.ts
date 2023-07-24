@@ -19,15 +19,14 @@ export class BaseComponent  {
    
 }
 
+
 export enum SpinnerType {
 
-  
+
   BallScaleMultiple = "s1",
   Pacman = "s2",
   BallSpinClockwiseFadeRotating = "s3",
   BallElasticDot = "s4",
-  SquareJellyBox = "s5"
-
-
-
+  SquareJellyBox = "s5",
+  SquareLoader = "SquareLoader"
 }

@@ -5,6 +5,8 @@ import { RouterModule } from '@angular/router';
 import { HomeModule } from './home/home.module';
 import { VoteModule } from './vote/vote.module';
 import { RegisterModule } from './register/register.module';
+import { PasswordResetModule } from './password-reset/password-reset.module';
+import { UpdatePasswordModule } from './update-password/update-password.module';
 
 
 
@@ -15,7 +17,9 @@ import { RegisterModule } from './register/register.module';
     PlaylistModule,
     HomeModule,
     VoteModule,
-    RegisterModule
+    RegisterModule,
+    PasswordResetModule,
+    UpdatePasswordModule
    
   ]
 })

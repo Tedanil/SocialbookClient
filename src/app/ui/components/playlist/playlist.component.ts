@@ -200,7 +200,11 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
           let videoIds = response.videoIds;
           this.videos = this.getRandomSubarray(videoIds, 3);
           let loadedVideos = 0; // Keep track of how many videos have loaded
+          this.userService.updateAllVoteCounts();
+          this.userService.getUserByToken(token);
+          
           this.songService.updatePostVideoIds(this.videos, (response) => {
+            
             this.videos = response;
             for (let video of this.videos) {
               this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
@@ -241,7 +245,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
         });
 
-        this.userService.updateAllVoteCounts();
+        
         
 
        
