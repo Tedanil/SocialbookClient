@@ -298,20 +298,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     return `linear-gradient(to right, #0000ff ${percentage}%, #ffffff ${percentage}%)`;
   }
 
-  create(videoId: HTMLInputElement, genre: HTMLInputElement) {
-    this.showSpinner(SpinnerType.BallElasticDot)
-    const song: Song = new Song();
-    song.videoId = videoId.value;
-    song.genre = genre.value;
 
-    this.songService.create(song, () => {
-      this.hideSpinner(SpinnerType.BallElasticDot);
-      this.toastrService.message("Ürün başarıyla eklenmiştir.", "ürün", {
-        messageType: ToastrMessageType.Success,
-        position: ToastrPosition.TopRight
-      });
-    });
-  }
 
   async sendMessage(event: Event, message: string) {
     event.preventDefault();

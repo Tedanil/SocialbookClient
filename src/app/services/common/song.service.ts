@@ -24,6 +24,7 @@ export class SongService {
    errorCallBack?: (errorMessage: string) => void): Promise<{totalSongCount: number;   songs: List_Song[] }> {
     const promiseData: Promise<{totalSongCount: number;   songs: List_Song[]}> = this.httpClientService.get< {totalSongCount: number;   songs: List_Song[] }>({
       controller: "songs",
+      action: "getSongs",
       queryString: `page=${page}&size=${size}`
       
 

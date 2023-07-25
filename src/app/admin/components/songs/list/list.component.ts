@@ -43,6 +43,7 @@ export class ListComponent extends BaseComponent implements OnInit {
     this.dataSource = new MatTableDataSource<List_Song>(allSongs.songs);
 
     this.paginator.length = allSongs.totalSongCount;
+    
 
   }
 
