@@ -1,0 +1,25 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .role-create {
+
+    margin: 5px 5px 5px
+  }
+
+  .btn {
+
+    margin: 5px 28px 8px
+  }
+
+  .custom-select{
+  
+    background-color: rgba(0,0,0,.04);
+    width: 100%;
+    height: 50px;
+    border: none;
+    opacity: 0.7;
+    border-bottom: 1px solid rgba(0,0,0);
+    
+  }

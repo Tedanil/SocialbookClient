@@ -20,6 +20,10 @@
             <button mat-menu-item routerLink="" style="color:red;cursor:pointer;" (click)="signOut()"
             *ngIf="authService.isAuthenticated">Çıkış Yap</button>  
           </li>
+          <li>
+            <a routerLink="admin" class="btn btn-outline-success" type="submit"
+              *ngIf="authService.isAuthenticated && authService.isAdmin">Yönetim Paneli</a>
+          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Dropdown
@@ -30,9 +34,6 @@
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="#">Something else here</a></li>
             </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled text-white">Disabled</a>            
           </li>
         </ul>
         <!-- <form class="d-flex" role="search">

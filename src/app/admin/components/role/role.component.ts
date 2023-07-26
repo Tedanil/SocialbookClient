@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ListComponent } from './list/list.component';
 
 @Component({
   selector: 'app-role',
@@ -10,6 +11,13 @@ export class RoleComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  @ViewChild(ListComponent) ListComponents: ListComponent
+
+  createdRole(createdRole: string) {
+    this.ListComponents.getRoles();
+
   }
 
 }

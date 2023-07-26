@@ -4,7 +4,9 @@ import { MatTableDataSource } from '@angular/material/table';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { BaseComponent, SpinnerType } from 'src/app/base/base.component';
 import { List_User } from 'src/app/contracts/users/list_user';
+import { AuthorizeUserDialogComponent } from 'src/app/dialogs/authorize-user-dialog/authorize-user-dialog.component';
 import { CustomToastrService, ToastrMessageType, ToastrPosition } from 'src/app/services/common/custom-toastr.service';
+import { DialogService } from 'src/app/services/common/dialog.service';
 import { UserService } from 'src/app/services/common/user.service';
 
 @Component({
@@ -16,11 +18,12 @@ export class ListComponent extends BaseComponent implements OnInit {
 
   constructor(spinner: NgxSpinnerService,
     private userService: UserService,
-    private toastrService: CustomToastrService) {
+    private toastrService: CustomToastrService,
+    private dialogService: DialogService) {
     super(spinner)
   }
 
-  displayedColumns: string[] = ['userName', 'nameSurname', 'email', 'twoFactorEnabled'];
+  displayedColumns: string[] = ['userName', 'nameSurname', 'email', 'twoFactorEnabled','role' ];
   dataSource: MatTableDataSource<List_User> = null;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   
@@ -44,6 +47,22 @@ export class ListComponent extends BaseComponent implements OnInit {
 
   async ngOnInit() {
     await this.getUsers();
+  }
+
+  assignRole(id: string) {
+    this.dialogService.openDialog({
+      componentType: AuthorizeUserDialogComponent,
+      data: id,
+      options: {
+        width: "750px"
+      },
+      afterClosed: () => {
+        this.toastrService.message("Role Başariyla Tanımlanmıştır.", "Başarılı", {
+          messageType: ToastrMessageType.Success,
+          position: ToastrPosition.TopRight
+        });
+      }
+    });
   }
 
 }

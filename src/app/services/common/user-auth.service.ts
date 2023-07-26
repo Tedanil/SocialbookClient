@@ -25,7 +25,7 @@ export class UserAuthService {
     if (tokenResponse.token) {
       localStorage.setItem("accessToken", tokenResponse.token.accessToken);
       localStorage.setItem("refreshToken", tokenResponse.token.refreshToken);
-      //this.authService.adminCheck();
+      this.authService.adminCheck();
 
 
 

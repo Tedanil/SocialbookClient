@@ -8,6 +8,6 @@ export class User_Response
    exp: number;
    title: string;
    userId: string;
-   //role: string;
+   role: string;
 
 }
