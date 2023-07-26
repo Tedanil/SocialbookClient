@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,6 +15,12 @@ import { FacebookLoginProvider, GoogleLoginProvider, SocialAuthServiceConfig, So
 import { MatButtonModule } from '@angular/material/button';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatListModule } from '@angular/material/list';
+
+
 
 
 @NgModule({
@@ -36,8 +42,8 @@ import { MatInputModule } from '@angular/material/input';
         allowedDomains: ["localhost:7084"]
       }
     }),
-    SocialLoginModule,
-    MatInputModule, MatButtonModule,ReactiveFormsModule,MatInputModule,MatInputModule
+    SocialLoginModule, MatIconModule, MatBadgeModule,
+    MatButtonModule,ReactiveFormsModule,MatMenuModule, MatInputModule
     
     
   ],
@@ -62,6 +68,7 @@ import { MatInputModule } from '@angular/material/input';
       } as SocialAuthServiceConfig
     },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule { }

@@ -5,6 +5,14 @@ import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import {MatTreeModule} from '@angular/material/tree';
 import {MatIconModule} from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { DialogModule } from 'src/app/dialogs/dialog.module';
+
+
+
 
 
 
@@ -19,7 +27,13 @@ import {MatIconModule} from '@angular/material/icon';
     ]),
     MatTreeModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSidenavModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    DialogModule
+    
+    
    
     
     

@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { DialogModule } from '@angular/cdk/dialog';
 
 
 
@@ -25,7 +26,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
       {path: "", component:UserComponent}
     ]),
     MatSidenavModule, MatFormFieldModule, MatInputModule, MatButtonModule,
-     MatTableModule, MatPaginatorModule,
+     MatTableModule, MatPaginatorModule,DialogModule
       //FileUploadModule, DialogModule,DeleteDirectiveModule
   ]
 })
