@@ -14,6 +14,7 @@ import { AuthorizeMenuDialogComponent } from './authorize-menu-dialog/authorize-
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthorizeUserDialogComponent } from './authorize-user-dialog/authorize-user-dialog.component';
+import { DeleteDialogComponent } from './delete-dialog/delete-dialog.component';
 
 
 
@@ -21,7 +22,8 @@ import { AuthorizeUserDialogComponent } from './authorize-user-dialog/authorize-
     declarations: [
    
     AuthorizeMenuDialogComponent,
-         AuthorizeUserDialogComponent
+         AuthorizeUserDialogComponent,
+         DeleteDialogComponent
   ],
     imports: [
       CommonModule,

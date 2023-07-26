@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
+import { DeleteDirectiveModule } from 'src/app/directives/common/delete.directive.module';
 
 
 
@@ -27,9 +28,9 @@ import { MatTableModule } from '@angular/material/table';
       {path: "", component:SongsComponent}
     ]),
     MatSidenavModule, MatFormFieldModule, MatInputModule, MatButtonModule,
-    MatTableModule, MatPaginatorModule,
+    MatTableModule, MatPaginatorModule, DeleteDirectiveModule
      // FileUploadModule, DialogModule,
-     // DeleteDirectiveModule
+      
   ]
 })
 export class SongsModule { }
