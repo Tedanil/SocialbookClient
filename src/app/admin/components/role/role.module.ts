@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { DeleteDirectiveModule } from 'src/app/directives/common/delete.directive.module';
 
 
 
@@ -27,7 +28,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
     ]),
     MatSidenavModule, MatFormFieldModule, MatInputModule, MatButtonModule,
     MatTableModule, MatPaginatorModule,
-    // DeleteDirectiveModule
+     DeleteDirectiveModule
   ]
 })
 export class RoleModule { }

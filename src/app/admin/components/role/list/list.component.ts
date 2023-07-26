@@ -23,7 +23,7 @@ export class ListComponent extends BaseComponent implements OnInit {
   }
  
 
- displayedColumns: string[] = ['name', 'edit' ];
+ displayedColumns: string[] = ['name', 'edit', 'delete' ];
  dataSource: MatTableDataSource<List_Role> = null;
 
 
