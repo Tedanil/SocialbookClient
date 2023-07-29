@@ -65,26 +65,26 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
     });
     this.listenForVoteListUpdates();
-    this.songService.getVideoIds((response) => {
-      let videoIds = response.videoIds;
-      this.videos = this.getRandomSubarray(videoIds, 3);
-      this.songService.postVideoIds(this.videos, (response) => {
-        // API'dan dönen cevapla ilgili işlemler
-        this.videos = response;
-        for (let video of this.videos) {
-          this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
-            this.videoData[video] = {
-              title: res.items[0].snippet.title,
-              thumbnail: res.items[0].snippet.thumbnails.medium.url,
-            };
-            // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
-          });
-        }
-      });
+    this.loadVideoIds();
+    // this.songService.getVideoIds((response) => {
+    //   this.videos = response.videoIds;
+      
+     
+    //     for (let video of this.videos) {
+    //       this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
+    //         this.videoData[video] = {
+    //           title: res.items[0].snippet.title,
+    //           thumbnail: res.items[0].snippet.thumbnails.medium.url,
+    //         };
+    //         // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
+    //       });
+    //     }
+      
 
-    });
+    // });
 
     this.listenForMessages();
+    this.listenForVideoIds();
 
 
     //this.listenForVoteListUpdates(); // oylama listesi güncellemelerini dinle
@@ -140,6 +140,8 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
         'start': startSeconds
       }
     });
+
+
   }
 
 
@@ -177,79 +179,81 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
     if (isEnded) {
       this.disableVote = true;
-      let maxVotes = -1;
-      let nextVideoId: string;
-      for (const video of this.videos) {
-        const votes = this.videoData[video]?.votes || 0;
-        if (votes > maxVotes) {
-          maxVotes = votes;
-          nextVideoId = video;
-        }
-      }
+      // let maxVotes = -1;
+      // let nextVideoId: string;
+      // for (const video of this.videos) {
+      //   const votes = this.videoData[video]?.votes || 0;
+    
 
-      if (nextVideoId) {
-        this.videoId = nextVideoId;
-        for (let video of this.videos) {
-          this.videoData[video].votes = 0;
-          this.updateVoteListOnServer(video);
-        }
-        this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
+      //   if (votes > maxVotes) {
+      //     maxVotes = votes;
+      //     nextVideoId = video;
+      //   }
+      // }
+
+      // if (nextVideoId) {
+      //   this.videoId = nextVideoId;
+      //   for (let video of this.videos) {
+      //     this.videoData[video].votes = 0;
+      //     this.updateVoteListOnServer(video);
+      //   }
+      //   this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
 
 
-        this.songService.getVideoIds((response) => {
-          let videoIds = response.videoIds;
-          this.videos = this.getRandomSubarray(videoIds, 3);
-          let loadedVideos = 0; // Keep track of how many videos have loaded
-          this.userService.updateAllVoteCounts();
-          this.userService.getUserByToken(token);
+      //   this.songService.getVideoIds((response) => {
+      //     let videoIds = response.videoIds;
+      //     this.videos = this.getRandomSubarray(videoIds, 3);
+      //     let loadedVideos = 0; // Keep track of how many videos have loaded
+      //     this.userService.updateAllVoteCounts();
+      //     this.userService.getUserByToken(token);
           
-          this.songService.updatePostVideoIds(this.videos, (response) => {
+      //     this.songService.updatePostVideoIds(this.videos, (response) => {
             
-            this.videos = response;
-            for (let video of this.videos) {
-              this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
-                this.videoData[video] = {
-                  title: res.items[0].snippet.title,
-                  thumbnail: res.items[0].snippet.thumbnails.medium.url,
-                  votes: 0 // initialize votes to 0
-                };
-                loadedVideos++;
-                if (loadedVideos === this.videos.length) {
-                  // Only call detectChanges() after all videos have loaded
-                  this.cdRef.detectChanges();
-                }
-              });
-            }
-          });
+      //       this.videos = response;
+      //       for (let video of this.videos) {
+      //         this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
+      //           this.videoData[video] = {
+      //             title: res.items[0].snippet.title,
+      //             thumbnail: res.items[0].snippet.thumbnails.medium.url,
+      //             votes: 0 // initialize votes to 0
+      //           };
+      //           loadedVideos++;
+      //           if (loadedVideos === this.videos.length) {
+      //             // Only call detectChanges() after all videos have loaded
+      //             this.cdRef.detectChanges();
+      //           }
+      //         });
+      //       }
+      //     });
 
 
 
-          this.youtubeService.getVideoInfoWithContentDetails(this.videoId).subscribe((res: any) => {
-            console.log("HAHAHAHAHHAHA");
-            console.log(res);
-            let duration = res.items[0].contentDetails.duration; // Duration bilgisi burada alınıyor
-            let videoDurationInSeconds = this.convertDurationToSeconds(duration); // Duration saniyeye çevriliyor
-            let videoIdAndTime = new VideoIdAndTime();
-            videoIdAndTime.videoId = this.videoId;
-            videoIdAndTime.videoTime = videoDurationInSeconds.toString();
+      //     this.youtubeService.getVideoInfoWithContentDetails(this.videoId).subscribe((res: any) => {
+      //       console.log("HAHAHAHAHHAHA");
+      //       console.log(res);
+      //       let duration = res.items[0].contentDetails.duration; // Duration bilgisi burada alınıyor
+      //       let videoDurationInSeconds = this.convertDurationToSeconds(duration); // Duration saniyeye çevriliyor
+      //       let videoIdAndTime = new VideoIdAndTime();
+      //       videoIdAndTime.videoId = this.videoId;
+      //       videoIdAndTime.videoTime = videoDurationInSeconds.toString();
 
-            // videoIdAndTime nesnesi burada kullanıma hazır
-            this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
+      //       // videoIdAndTime nesnesi burada kullanıma hazır
+      //       // this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
 
-            });
-          });
-
-
+      //       // });
+      //     });
 
 
 
-        });
+
+
+      //   });
 
         
         
 
        
-      }
+      // }
       
 
     }
@@ -320,6 +324,24 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       const hubConnection = await this.signalRService.start(HubUrls.MessageHub);
       hubConnection.on(ReceiveFunctions.MessageSent, (message) => {
         this.messages.push(message); // here, instead of showing a toast notification, we're adding the message to the array
+      });
+    } catch (error) {
+      console.log('An error occurred while starting the connection or setting up message listening: ', error);
+    }
+  }
+
+  async listenForVideoIds() {
+    try {
+      console.log("BABABABBABABAB");
+
+      const hubConnection = await this.signalRService.start(HubUrls.VideoIdHub);
+      hubConnection.on(ReceiveFunctions.VideoIdSent, (videoId) => {
+        this.videoId = videoId;
+        this.player.loadVideoById(this.videoId);
+      console.log("ZAFZFAFAFAFA");
+    this.loadVideoIds();
+
+
       });
     } catch (error) {
       console.log('An error occurred while starting the connection or setting up message listening: ', error);
@@ -427,6 +449,27 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     let minutes = parseInt((match[2] || '').replace(/\D/g, ''), 10) || 0;
     let seconds = parseInt((match[3] || '').replace(/\D/g, ''), 10) || 0;
     return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  async loadVideoIds() {
+    this.songService.getVideoIds((response) => {
+      this.videos = response.videoIds;
+      
+      for (let video of this.videos) {
+        this.loadVideoData(video);
+      }
+    });
+  }
+  
+  async loadVideoData(videoId: string) {
+    this.youtubeService.getVideoInfo(videoId).subscribe((res: any) => {
+      this.videoData[videoId] = {
+        title: res.items[0].snippet.title,
+        thumbnail: res.items[0].snippet.thumbnails.medium.url,
+        votes: 0 // initialize votes to 0
+      };
+      // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
+    });
   }
 
 
