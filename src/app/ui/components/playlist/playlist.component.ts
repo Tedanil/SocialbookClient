@@ -105,7 +105,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     this.listenForVideoStateUpdates();
 
 
-    
+
   }
 
 
@@ -337,9 +337,9 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       hubConnection.on(ReceiveFunctions.VideoIdSent, (videoId) => {
         this.videoId = videoId;
         for (let video of this.videos) {
-               this.videoData[video].votes = 0;
-               this.updateVoteListOnServer(video);
-             }
+          this.videoData[video].votes = 0;
+          this.updateVoteListOnServer(video);
+        }
 
         this.player.loadVideoById(this.videoId);
         //this.userService.updateAllVoteCounts();
@@ -461,7 +461,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       this.videos = response.videoIds;
 
       for (let video of this.videos) {
-        
+
         this.loadVideoData(video);
       }
     });
@@ -472,9 +472,14 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       this.videoData[videoId] = {
         title: res.items[0].snippet.title,
         thumbnail: res.items[0].snippet.thumbnails.medium.url,
-        votes: 0 // initialize votes to 0
+        votes: 0 // initially set votes to 0
       };
-      // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
+
+      // Then update the votes value from the server
+      this.songService.getSongVideoVotes(videoId, (votes) => {
+        // if votes is undefined or null, keep it as 0
+        this.videoData[videoId].votes = votes || 0;
+      });
     });
 
     const token: string = localStorage.getItem("refreshToken");

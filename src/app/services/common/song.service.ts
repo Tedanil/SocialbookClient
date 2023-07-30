@@ -96,6 +96,22 @@ export class SongService {
         }
       });
   }
+  getSongVideoVotes(videoId, successCallBack?: any) {
+    this.httpClientService.get<any>({
+      controller: "songs",
+      action: `getSongVideoVotes/${videoId}`
+    })
+      .subscribe(result => {
+        if (typeof result.votes !== 'number') {
+          console.error('Votes value for video', videoId, 'is not a number:', result.votes);
+          return;
+        }
+
+        if (successCallBack) {
+          successCallBack(result.votes);
+        }
+      });
+  }
   
 
 
