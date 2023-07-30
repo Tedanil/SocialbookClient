@@ -48,7 +48,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   constructor(private renderer: Renderer2, spinner: NgxSpinnerService, private songService: SongService,
     private toastrService: CustomToastrService, private youtubeService: YoutubeService, private cdRef: ChangeDetectorRef,
     private signalRService: SignalRService, private userService: UserService, public authService: AuthService) {
-    authService.identityCheck();   
+    authService.identityCheck();
 
     super(spinner)
   } // Renderer2'yi enjekte et
@@ -65,11 +65,14 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
     });
     this.listenForVoteListUpdates();
+    const token: string = localStorage.getItem("refreshToken");
+    this.currentUser = await this.userService.getUserByToken(token);
+    console.log(this.currentUser);
     this.loadVideoIds();
     // this.songService.getVideoIds((response) => {
     //   this.videos = response.videoIds;
-      
-     
+
+
     //     for (let video of this.videos) {
     //       this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
     //         this.videoData[video] = {
@@ -79,7 +82,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     //         // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
     //       });
     //     }
-      
+
 
     // });
 
@@ -102,9 +105,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     this.listenForVideoStateUpdates();
 
 
-    const token: string = localStorage.getItem("refreshToken");
-    this.currentUser = await this.userService.getUserByToken(token);
-    console.log(this.currentUser);
+    
   }
 
 
@@ -145,7 +146,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   }
 
 
- async onPlayerStateChange(event) {
+  async onPlayerStateChange(event) {
     this.ytEvent = event.data;
 
     const isPlaying = this.ytEvent === window['YT'].PlayerState.PLAYING;
@@ -183,7 +184,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       // let nextVideoId: string;
       // for (const video of this.videos) {
       //   const votes = this.videoData[video]?.votes || 0;
-    
+
 
       //   if (votes > maxVotes) {
       //     maxVotes = votes;
@@ -206,9 +207,9 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       //     let loadedVideos = 0; // Keep track of how many videos have loaded
       //     this.userService.updateAllVoteCounts();
       //     this.userService.getUserByToken(token);
-          
+
       //     this.songService.updatePostVideoIds(this.videos, (response) => {
-            
+
       //       this.videos = response;
       //       for (let video of this.videos) {
       //         this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
@@ -249,16 +250,16 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
       //   });
 
-        
-        
 
-       
+
+
+
       // }
-      
+
 
     }
     const token: string = localStorage.getItem("refreshToken");
-        this.currentUser = await this.userService.getUserByToken(token);
+    this.currentUser = await this.userService.getUserByToken(token);
 
   }
 
@@ -279,7 +280,7 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     return shuffled.slice(0, size);
   }
 
- async vote(video: string) {
+  async vote(video: string) {
     if (!this.videoData[video].votes) {
       this.videoData[video].votes = 0;
     }
@@ -332,14 +333,18 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
   async listenForVideoIds() {
     try {
-      console.log("BABABABBABABAB");
-
       const hubConnection = await this.signalRService.start(HubUrls.VideoIdHub);
       hubConnection.on(ReceiveFunctions.VideoIdSent, (videoId) => {
         this.videoId = videoId;
+        for (let video of this.videos) {
+               this.videoData[video].votes = 0;
+               this.updateVoteListOnServer(video);
+             }
+
         this.player.loadVideoById(this.videoId);
-      console.log("ZAFZFAFAFAFA");
-    this.loadVideoIds();
+        //this.userService.updateAllVoteCounts();
+
+        this.loadVideoIds();
 
 
       });
@@ -454,13 +459,14 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
   async loadVideoIds() {
     this.songService.getVideoIds((response) => {
       this.videos = response.videoIds;
-      
+
       for (let video of this.videos) {
+        
         this.loadVideoData(video);
       }
     });
   }
-  
+
   async loadVideoData(videoId: string) {
     this.youtubeService.getVideoInfo(videoId).subscribe((res: any) => {
       this.videoData[videoId] = {
@@ -470,6 +476,9 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
       };
       // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
     });
+
+    const token: string = localStorage.getItem("refreshToken");
+    this.userService.getUserByToken(token);
   }
 
 
