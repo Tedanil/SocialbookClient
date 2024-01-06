@@ -69,25 +69,25 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     this.currentUser = await this.userService.getUserByToken(token);
     console.log(this.currentUser);
     this.loadVideoIds();
-    // this.songService.getVideoIds((response) => {
-    //   this.videos = response.videoIds;
+     this.songService.getVideoIds((response) => {
+       this.videos = response.videoIds;
 
 
-    //     for (let video of this.videos) {
-    //       this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
-    //         this.videoData[video] = {
-    //           title: res.items[0].snippet.title,
-    //           thumbnail: res.items[0].snippet.thumbnails.medium.url,
-    //         };
-    //         // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
-    //       });
-    //     }
+         for (let video of this.videos) {
+           this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
+             this.videoData[video] = {
+               title: res.items[0].snippet.title,
+               thumbnail: res.items[0].snippet.thumbnails.medium.url,
+             };
+             // her bir video bilgisi güncellendiğinde, oylama listesini sunucuda güncelle
+           });
+         }
 
 
-    // });
+     });
 
     this.listenForMessages();
-    this.listenForVideoIds();
+    //this.listenForVideoIds();
 
 
     //this.listenForVoteListUpdates(); // oylama listesi güncellemelerini dinle
@@ -180,81 +180,81 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
 
     if (isEnded) {
       this.disableVote = true;
-      // let maxVotes = -1;
-      // let nextVideoId: string;
-      // for (const video of this.videos) {
-      //   const votes = this.videoData[video]?.votes || 0;
+       let maxVotes = -1;
+       let nextVideoId: string;
+       for (const video of this.videos) {
+         const votes = this.videoData[video]?.votes || 0;
 
 
-      //   if (votes > maxVotes) {
-      //     maxVotes = votes;
-      //     nextVideoId = video;
-      //   }
-      // }
+         if (votes > maxVotes) {
+           maxVotes = votes;
+           nextVideoId = video;
+         }
+       }
 
-      // if (nextVideoId) {
-      //   this.videoId = nextVideoId;
-      //   for (let video of this.videos) {
-      //     this.videoData[video].votes = 0;
-      //     this.updateVoteListOnServer(video);
-      //   }
-      //   this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
-
-
-      //   this.songService.getVideoIds((response) => {
-      //     let videoIds = response.videoIds;
-      //     this.videos = this.getRandomSubarray(videoIds, 3);
-      //     let loadedVideos = 0; // Keep track of how many videos have loaded
-      //     this.userService.updateAllVoteCounts();
-      //     this.userService.getUserByToken(token);
-
-      //     this.songService.updatePostVideoIds(this.videos, (response) => {
-
-      //       this.videos = response;
-      //       for (let video of this.videos) {
-      //         this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
-      //           this.videoData[video] = {
-      //             title: res.items[0].snippet.title,
-      //             thumbnail: res.items[0].snippet.thumbnails.medium.url,
-      //             votes: 0 // initialize votes to 0
-      //           };
-      //           loadedVideos++;
-      //           if (loadedVideos === this.videos.length) {
-      //             // Only call detectChanges() after all videos have loaded
-      //             this.cdRef.detectChanges();
-      //           }
-      //         });
-      //       }
-      //     });
+       if (nextVideoId) {
+         this.videoId = nextVideoId;
+         for (let video of this.videos) {
+           this.videoData[video].votes = 0;
+           this.updateVoteListOnServer(video);
+         }
+         this.player.loadVideoById(this.videoId); // Bu satırı değiştirdik
 
 
+         this.songService.getVideoIds((response) => {
+           let videoIds = response.videoIds;
+           this.videos = this.getRandomSubarray(videoIds, 3);
+           let loadedVideos = 0; // Keep track of how many videos have loaded
+           this.userService.updateAllVoteCounts();
+           this.userService.getUserByToken(token);
 
-      //     this.youtubeService.getVideoInfoWithContentDetails(this.videoId).subscribe((res: any) => {
-      //       console.log("HAHAHAHAHHAHA");
-      //       console.log(res);
-      //       let duration = res.items[0].contentDetails.duration; // Duration bilgisi burada alınıyor
-      //       let videoDurationInSeconds = this.convertDurationToSeconds(duration); // Duration saniyeye çevriliyor
-      //       let videoIdAndTime = new VideoIdAndTime();
-      //       videoIdAndTime.videoId = this.videoId;
-      //       videoIdAndTime.videoTime = videoDurationInSeconds.toString();
+           this.songService.updatePostVideoIds(this.videos, (response) => {
 
-      //       // videoIdAndTime nesnesi burada kullanıma hazır
-      //       // this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
-
-      //       // });
-      //     });
+             this.videos = response;
+             for (let video of this.videos) {
+               this.youtubeService.getVideoInfo(video).subscribe((res: any) => {
+                 this.videoData[video] = {
+                   title: res.items[0].snippet.title,
+                   thumbnail: res.items[0].snippet.thumbnails.medium.url,
+                   votes: 0 // initialize votes to 0
+                 };
+                 loadedVideos++;
+                 if (loadedVideos === this.videos.length) {
+                   // Only call detectChanges() after all videos have loaded
+                   this.cdRef.detectChanges();
+                 }
+               });
+             }
+           });
 
 
 
+           this.youtubeService.getVideoInfoWithContentDetails(this.videoId).subscribe((res: any) => {
+            console.log("HAHAHAHAHHAHA");
+             console.log(res);
+             let duration = res.items[0].contentDetails.duration; // Duration bilgisi burada alınıyor
+             let videoDurationInSeconds = this.convertDurationToSeconds(duration); // Duration saniyeye çevriliyor
+             let videoIdAndTime = new VideoIdAndTime();
+            videoIdAndTime.videoId = this.videoId;
+             videoIdAndTime.videoTime = videoDurationInSeconds.toString();
 
 
-      //   });
+              this.songService.updateCurrentVideoId(videoIdAndTime, (response) => {
+
+              });
+           });
 
 
 
 
 
-      // }
+         });
+
+
+
+
+
+       }
 
 
     }
@@ -331,27 +331,27 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     }
   }
 
-  async listenForVideoIds() {
-    try {
-      const hubConnection = await this.signalRService.start(HubUrls.VideoIdHub);
-      hubConnection.on(ReceiveFunctions.VideoIdSent, (videoId) => {
-        this.videoId = videoId;
-        for (let video of this.videos) {
-          this.videoData[video].votes = 0;
-          this.updateVoteListOnServer(video);
-        }
+  // async listenForVideoIds() {
+  //   try {
+  //     const hubConnection = await this.signalRService.start(HubUrls.VideoIdHub);
+  //     hubConnection.on(ReceiveFunctions.VideoIdSent, (videoId) => {
+  //       this.videoId = videoId;
+  //       for (let video of this.videos) {
+  //         this.videoData[video].votes = 0;
+  //         this.updateVoteListOnServer(video);
+  //       }
 
-        this.player.loadVideoById(this.videoId);
-        //this.userService.updateAllVoteCounts();
+  //       this.player.loadVideoById(this.videoId);
+  //       //this.userService.updateAllVoteCounts();
 
-        this.loadVideoIds();
+  //       this.loadVideoIds();
 
 
-      });
-    } catch (error) {
-      console.log('An error occurred while starting the connection or setting up message listening: ', error);
-    }
-  }
+  //     });
+  //   } catch (error) {
+  //     console.log('An error occurred while starting the connection or setting up message listening: ', error);
+  //   }
+  // }
 
   async updateVoteListOnServer(video: string) {
     try {
@@ -456,35 +456,35 @@ export class PlaylistComponent extends BaseComponent implements AfterViewInit, O
     return hours * 3600 + minutes * 60 + seconds;
   }
 
-  async loadVideoIds() {
-    this.songService.getVideoIds((response) => {
-      this.videos = response.videoIds;
+   async loadVideoIds() {
+     this.songService.getVideoIds((response) => {
+       this.videos = response.videoIds;
 
-      for (let video of this.videos) {
+       for (let video of this.videos) {
 
-        this.loadVideoData(video);
-      }
-    });
-  }
+         this.loadVideoData(video);
+       }
+     });
+   }
 
-  async loadVideoData(videoId: string) {
-    this.youtubeService.getVideoInfo(videoId).subscribe((res: any) => {
-      this.videoData[videoId] = {
-        title: res.items[0].snippet.title,
-        thumbnail: res.items[0].snippet.thumbnails.medium.url,
-        votes: 0 // initially set votes to 0
-      };
+   async loadVideoData(videoId: string) {
+     this.youtubeService.getVideoInfo(videoId).subscribe((res: any) => {
+       this.videoData[videoId] = {
+         title: res.items[0].snippet.title,
+         thumbnail: res.items[0].snippet.thumbnails.medium.url,
+         votes: 0 // initially set votes to 0
+       };
 
-      // Then update the votes value from the server
-      this.songService.getSongVideoVotes(videoId, (votes) => {
-        // if votes is undefined or null, keep it as 0
-        this.videoData[videoId].votes = votes || 0;
-      });
-    });
+       // Then update the votes value from the server
+       this.songService.getSongVideoVotes(videoId, (votes) => {
+         // if votes is undefined or null, keep it as 0
+         this.videoData[videoId].votes = votes || 0;
+       });
+     });
 
-    const token: string = localStorage.getItem("refreshToken");
-    this.userService.getUserByToken(token);
-  }
+     const token: string = localStorage.getItem("refreshToken");
+     this.userService.getUserByToken(token);
+   }
 
 
 
