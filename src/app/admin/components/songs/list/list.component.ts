@@ -25,7 +25,7 @@ export class ListComponent extends BaseComponent implements OnInit {
   }
 
 
-  displayedColumns: string[] = ['videoId', 'genre', 'delete'];
+  displayedColumns: string[] = ['videoId', 'name', 'genre', 'delete'];
   dataSource: MatTableDataSource<List_Song> = null;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
